@@ -1,0 +1,26 @@
+[package]
+name = "mpv-web-remote"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "mpv-web-remote"
+required-features = ["server"]
+
+[dependencies]
+anyhow = { version = "1.0.72", optional = true}
+axum = {version = "0.6.20", optional = true}
+chrono = { version = "0.4.26", optional = true}
+clap = { version = "4.3.21", features = ["derive"], optional = true }
+fern = { version = "0.6.2", features = ["colored"], optional = true }
+image = {version = "0.24.7", optional = true}
+log = "0.4.19"
+serde = { version = "1.0.183", features = ["derive"] }
+serde_json = "1.0.104"
+thiserror = "1.0.44"
+tokio = { version = "1.30.0", features = ["macros", "rt-multi-thread"], optional = true }
+
+[features]
+server = ["dep:tokio", "dep:image", "dep:fern", "dep:clap", "dep:axum", "dep:anyhow", "dep:chrono"]
+default = ["server"]

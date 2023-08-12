@@ -1,0 +1,12 @@
+[Unit]
+Description=mpv-web-remote
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=20
+ExecStart=/usr/local/bin/mpv-web-remote %h/mpv
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,145 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+      <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>mpv remote</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+
+        <script src="/jquery.min.js"></script>
+
+        <style>
+         body {
+             font-family:  Tahoma, "Trebuchet MS", sans-serif;
+             width: 100%;
+             margin: 0;
+             overflow: hidden;
+         }
+         h1 {
+             width: 100%;
+         }
+         img {
+             width: 100%;
+         }
+         #content {
+             margin-left: 10px;
+             margin-right: 10px;
+             text-align: center;
+         }
+         #position {
+             background-color: #DBE2EF;
+             height: 30px;
+         }
+         #bar {
+             height: 30px;
+             margin-bottom: 10px;
+         }
+         #controls {
+             position: absolute;
+             bottom: 20px;
+             left: auto;
+             right: auto;
+             width: 100%;
+         }
+         #rewind {
+             position: absolute;
+             left: 5px;
+         }
+         #fullscreen {
+             position: absolute;
+             right: 25px;
+             margin-top:10px;
+         }
+         #current {
+             position: absolute;
+             left: 0;
+         }
+         #total {
+             position: absolute;
+             right: 0;
+         }
+         #times {
+             position:relative;
+         }
+        </style>
+
+    </head>
+    <body>
+        <div id="content">
+            <h1>mpv</h1>
+            <img src="/screenshot">
+            <div id="bar">
+                <div id="position"></div>
+            </div>
+            <div id="times">
+                <span id="current">00:00</span>
+                <span id="total">10:00</span>
+            </div>
+            <div id="controls">
+                <svg class="action" id="rewind" xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-rewind" viewBox="0 0 16 16">
+  <path d="M9.196 8 15 4.633v6.734L9.196 8Zm-.792-.696a.802.802 0 0 0 0 1.392l6.363 3.692c.52.302 1.233-.043 1.233-.696V4.308c0-.653-.713-.998-1.233-.696L8.404 7.304Z"/>
+  <path d="M1.196 8 7 4.633v6.734L1.196 8Zm-.792-.696a.802.802 0 0 0 0 1.392l6.363 3.692c.52.302 1.233-.043 1.233-.696V4.308c0-.653-.713-.998-1.233-.696L.404 7.304Z"/>
+</svg>
+                <svg class="action" id="play" xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-play-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/>
+                </svg>
+                <svg class="action" id="pause" xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-pause-fill" viewBox="0 0 16 16">
+                    <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+                </svg>
+                <svg class="action" id="fullscreen" xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-arrows-angle-expand" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707z"/>
+</svg>
+            </div>
+        </div>
+        <script>
+         // Image refresh
+         last_refresh_image = 0;
+         function refresh_image() {
+             $("img").each(function() {
+                 $(this).attr('src', $(this).attr('src') + '?' + Math.random());
+                 last_refresh_image = Date.now();
+             })
+         }
+         // Times and progress bar refresh
+         function refresh_times() {
+                 $.get("/times", {}, function(data) {
+                     $("#current").html(data.current);
+                     $("#total").html(data.total);
+                     $("#position").css("width", data.perc + "%");
+                 });
+
+         }
+         $( document ).ready(function() {
+             refresh_times();
+             // Refresh timers
+             setInterval(function(){
+                 refresh_times();
+             }, 1000);
+             setInterval(function(){
+                 if (Date.now() - last_refresh_image > 3000) {
+                     refresh_image();
+                 }
+             }, 1000);
+
+             // Seeking by clicking on the progress bar
+             $("#bar").click(function(e) {
+                 var perc = 100.0 * (e.pageX - $(this).parent().offset().left) / $("#bar").width();
+                 $.get("/action/seek", {"position": perc}, function() {
+                     refresh_image();
+                 });
+             });
+             // Clicking on the action buttons
+             $(".action").click(function() {
+                 $.get("/action/" + this.id, {}, function() {
+                     refresh_times();
+                     refresh_image();
+                 });
+
+             });
+
+         })
+        </script>
+    </body>
+</html>
