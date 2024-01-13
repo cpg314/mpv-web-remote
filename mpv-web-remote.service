@@ -9,4 +9,4 @@ RestartSec=20
 ExecStart=/usr/local/bin/mpv-web-remote %h/mpv
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

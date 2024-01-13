@@ -78,6 +78,13 @@ fn setup_logging(debug: bool) -> anyhow::Result<()> {
     Ok(())
 }
 
+async fn serve_binary(
+    data: &'static [u8],
+    content_type: &'static str,
+) -> impl axum::response::IntoResponse {
+    ([(axum::http::header::CONTENT_TYPE, content_type)], data)
+}
+
 async fn start(args: &Flags) -> anyhow::Result<()> {
     let options = Arc::new(args.options.clone());
     // Setup server
@@ -100,12 +107,14 @@ async fn start(args: &Flags) -> anyhow::Result<()> {
         .route("/", axum::routing::get(index))
         .route(
             "/jquery.min.js",
-            axum::routing::get(move || async move {
-                (
-                    [(axum::http::header::CONTENT_TYPE, "text/javascript")],
-                    include_bytes!("../jquery-3.7.0.min.js"),
-                )
-                    .into_response()
+            axum::routing::get(|| async {
+                serve_binary(include_bytes!("../jquery-3.7.0.min.js"), "text/javascript").await
+            }),
+        )
+        .route(
+            "/script.js",
+            axum::routing::get(|| async {
+                serve_binary(include_bytes!("../script.js"), "text/javascript").await
             }),
         )
         .route("/times", axum::routing::get(times))
@@ -154,7 +163,9 @@ fn format_duration(duration_s: f32) -> String {
 #[derive(Serialize)]
 struct Times {
     total: String,
+    total_s: f32,
     current: String,
+    current_s: f32,
     perc: f32,
 }
 async fn index(
@@ -168,7 +179,7 @@ async fn index(
     Ok(axum::response::Html(data))
 }
 async fn times(Extension(mpv): MpvExt) -> Result<axum::response::Json<Times>, Error> {
-    info!("Handling times request");
+    debug!("Handling times request");
     let mut mpv = mpv.lock().unwrap();
     let mut durations_s = vec![];
     for prop in ["playback-time", "duration"] {
@@ -178,6 +189,8 @@ async fn times(Extension(mpv): MpvExt) -> Result<axum::response::Json<Times>, Er
     Ok(axum::Json(Times {
         current: format_duration(durations_s[0]),
         total: format_duration(durations_s[1]),
+        total_s: durations_s[1],
+        current_s: durations_s[0],
         perc: 100.0 * durations_s[0] / durations_s[1],
     }))
 }
@@ -236,7 +249,7 @@ async fn action(
 }
 /// Return a downsampled JPG screenshot at the current location
 async fn serve_screenshot(Extension(mpv): MpvExt) -> Result<axum::response::Response, Error> {
-    info!("Handling screenshot request");
+    debug!("Handling screenshot request");
     let mut mpv = mpv.lock().unwrap();
     let filename = "/tmp/mpv.jpg";
     mpv.send(Request::screenshot(filename))?;
