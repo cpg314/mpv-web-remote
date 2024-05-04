@@ -1,0 +1,19 @@
+name: "mpv-web-remote"
+arch: "amd64"
+platform: "linux"
+version: "${CARGO_MAKE_PROJECT_VERSION}"
+release: "${RELEASE}"
+section: "default"
+priority: "extra"
+provides:
+  - mpv-web-remote
+description: "Web remote control for mpv"
+vendor: "cpg314"
+maintainer: "cpg314 <44120267+cpg314@users.noreply.github.com>"
+homepage: "https://github.com/cpg314/mpv-web-remote"
+contents:
+  - src: "./target-cross/$ARCH/release/mpv-web-remote"
+    dst: /usr/local/bin/mpv-web-remote
+    expand: true
+  - src: "./mpv-web-remote.service"
+    dst: /usr/lib/systemd/user/mpv-web-remote.service

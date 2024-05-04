@@ -16,18 +16,18 @@ See https://c.pgdm.ch/eps-projects/mpv-web-remote
 
 ## Installation
 
-Edit your `~/.config/mpv/mpv.conf` to add
+First, edit your `~/.config/mpv/mpv.conf` to add
 
 ```
 input-ipc-server=~/mpv
 ```
 
-Copy the binary and add the systemd service:
+The `.deb` and Arch Linux/Manjaro packages in the [releases page](https://github.com/cpg314/mpv-web-remote/releases) will install `mpv-web-remote` as well as a `systemd` service.
+
+It should suffice to enable it with
 
 ```console
-$ cp mpv-web-remote /usr/local/bin/
-$ cp mpv-web-remote.service ~/.config/systemd/user/
-$ systemctl --user daemon-reload && systemctl --user enable --now mpv-web-remote
+$ systemctl --user enable --now mpv-web-remote
 $ systemctl --user status mpv-web-remote
 INFO [mpv_rs::mpv] Connected to socket
 INFO [mpv_rs] Starting web server on http://0.0.0.0:3000
@@ -35,9 +35,21 @@ INFO [mpv_rs] Starting web server on http://0.0.0.0:3000
 
 The web server will then be enabled shortly after a new instance of mpv is started and binds to the socket.
 
-With the default parameters, the control interface will be accessible on <http://[ip]:3000>. Warning: there is currently no authentication.
+With the default parameters, the control interface will be accessible on <http://[ip]:3000>.
 
-Alternatively, the server can be started manually:
+Warning: there is currently no authentication.
+
+### Alternative: Manual installation
+
+```console
+$ cp mpv-web-remote /usr/local/bin/
+$ cp mpv-web-remote.service ~/.config/systemd/user/
+$ systemctl --user daemon-reload && systemctl --user enable --now mpv-web-remote
+```
+
+### Alternative: Without systemd
+
+The server can also be started manually:
 
 ```console
 $ mpv-web-remote --help
