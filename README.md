@@ -4,7 +4,11 @@ Simple web remote control for the [mpv media player](https://mpv.io/), using the
 
 ![Screenshot](screenshot.png)
 
-A single binary on the host machine connects to the mpv unix socket and exposes a remote control via a web server, that can be accessed e.g. from a mobile device.
+A single binary on the host machine connects to the mpv unix socket and exposes a remote control via a web server, that can be accessed from any device on the same network (e.g. a smartphone).
+
+The web app announces itself via the [media session API](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API), allowing control even when the app is in the background, or from connected devices (e.g. a smartwatch).
+
+![Screenshot](mediasession.png)
 
 The client code can also be used separately to interface with mpv from Rust in other use cases.
 

@@ -117,6 +117,12 @@ async fn start(args: &Flags) -> anyhow::Result<()> {
                 serve_binary(include_bytes!("../script.js"), "text/javascript").await
             }),
         )
+        .route(
+            "/silence.mp3",
+            axum::routing::get(|| async {
+                serve_binary(include_bytes!("../silence.mp3"), "audio/mp3").await
+            }),
+        )
         .route("/times", axum::routing::get(times))
         .route("/screenshot", axum::routing::get(serve_screenshot))
         .route("/action/:action", axum::routing::get(action))

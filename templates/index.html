@@ -63,9 +63,15 @@
       #times {
         position: relative;
       }
+      audio {
+        display: none;
+      }
     </style>
   </head>
   <body>
+    <audio controls id="audio" loop>
+      <source src="/silence.mp3" type="audio/mp3"/>
+    </audio>
     <div id="content">
       <h1>mpv</h1>
       <img src="/screenshot">
